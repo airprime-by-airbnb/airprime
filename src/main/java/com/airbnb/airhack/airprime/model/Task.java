@@ -30,6 +30,10 @@ public class Task implements Serializable, Comparable<Task> {
 	private double lng;
 	private String dueTime;
 
+	public double getMinutesFromDueTime() {
+		return Integer.parseInt(dueTime.split(":")[0]) * 60 + Integer.parseInt(dueTime.split(":")[1]);
+	}
+
 	public static void main(String[] args) {
 		Task t1 = new Task(1L, null, 1.3f, 1.6f, "16:45");
 		Task t2 = new Task(1L, null, 1.3f, 1.6f, "15:45");
@@ -43,7 +47,7 @@ public class Task implements Serializable, Comparable<Task> {
 		System.out.println(tasks);
 		Collections.sort(tasks);
 		System.out.println(tasks);
-		
+
 		System.out.println(tasks.stream().sorted().collect(Collectors.toList()));
 
 	}

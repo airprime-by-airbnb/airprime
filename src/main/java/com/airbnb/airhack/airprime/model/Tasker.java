@@ -24,8 +24,12 @@ public class Tasker {
 		this.lat = lat;
 		this.lng = lng;
 		this.point = point;
-		this.nextAvailability = plusMinutes(dueTime, 30); // +30
+		setDueTime(dueTime);
 		this.isFree = isFree;
+	}
+	
+	public void setDueTime(String dueTime) {
+		this.nextAvailability = plusMinutes(dueTime, 30);
 	}
 
 	private static final int plusMinutes(String dueTime, int minutes) {

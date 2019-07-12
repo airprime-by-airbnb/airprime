@@ -51,7 +51,26 @@ public class Algo {
 				sortedTask.setAssigneeId(i);
 				i++;
 			} else {
-				break;
+				int idPerson = -1;
+				double min = Integer.MAX_VALUE;
+				for (int j = 0; j < taskers.size(); j++) {
+					Tasker t = taskers.get(i);
+					double travel = matriceTemps[t.getPoint()][sortedTask.getId().intValue()];
+					double arrivedTime = t.getNextAvailability() + travel;
+					if (arrivedTime <= sortedTask.getMinutesFromDueTime()) {
+						if (travel < min) {
+							min = travel;
+							idPerson = j;
+						}
+					}
+				}
+				if (idPerson != -1) {
+
+					sortedTask.setAssigneeId(idPerson);
+					Tasker currentTasker = taskers.get(idPerson - 1);
+					currentTasker.setDueTime(sortedTask.getDueTime());
+				}
+
 			}
 		}
 

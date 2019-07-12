@@ -100,7 +100,9 @@ public class TaskController {
 			}
 			i++;
 		}
-		
+		System.out.println("Taskers : " + taskers);
+		System.out.println("batch : " + batch);
+
 		batch.setTasks(sortedTasks);
 
 		log.info("------------------ " + LocalDateTime.now());

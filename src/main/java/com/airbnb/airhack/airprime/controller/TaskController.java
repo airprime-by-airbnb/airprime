@@ -67,20 +67,20 @@ public class TaskController {
 			}
 		}
 
-		int i = 1;
+		int i = 0;
 		List<Tasker> taskers = new LinkedList<>();
 		for (Task sortedTask : sortedTasks) {
-			if (i <= batch.getTaskersCount()) {
+			if (i < batch.getTaskersCount()) {
 				Tasker t = new Tasker(i, sortedTask.getLat(), sortedTask.getLng(), i, false, sortedTask.getDueTime());
 				taskers.add(t);
 				sortedTask.setAssigneeId(i);
-				i++;
+				
 			} else {
 				int idPerson = -1;
 				double min = Integer.MAX_VALUE;
 				for (int j = 0; j < taskers.size(); j++) {
 					Tasker t = taskers.get(j);
-					double travel = matriceTemps[t.getPoint()][sortedTask.getId().intValue()];
+					double travel = matriceTemps[t.getPoint()][i];
 					double arrivedTime = t.getNextAvailability() + travel;
 					if (arrivedTime <= sortedTask.getMinutesFromDueTime()) {
 						if (travel < min) {
@@ -92,11 +92,13 @@ public class TaskController {
 				if (idPerson != -1) {
 
 					sortedTask.setAssigneeId(idPerson);
-					Tasker currentTasker = taskers.get(idPerson - 1);
+					Tasker currentTasker = taskers.get(idPerson);
+					currentTasker.setPoint(i);
 					currentTasker.setDueTime(sortedTask.getDueTime());
 				}
 
 			}
+			i++;
 		}
 		
 		batch.setTasks(sortedTasks);

@@ -2,6 +2,9 @@ package com.airbnb.airhack.airprime.controller;
 
 import java.net.URISyntaxException;
 import java.time.LocalDateTime;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
@@ -17,7 +20,11 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
+import com.airbnb.airhack.airprime.helper.DistanceHelper;
+import com.airbnb.airhack.airprime.helper.TimeHelper;
 import com.airbnb.airhack.airprime.model.Batch;
+import com.airbnb.airhack.airprime.model.Task;
+import com.airbnb.airhack.airprime.model.Tasker;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -41,6 +48,39 @@ public class TaskController {
 		log.info("------------------ Processing");
 
 		// TODO processing
+		List<Task> sortedTasks = batch.getTasks().stream().sorted().collect(Collectors.toList());
+		int tasksCount = batch.getTasksCount();
+		
+		double[][] matriceDistance = new double[tasksCount][tasksCount];
+		for (int i = 0; i < sortedTasks.size(); i++) {
+			for (int j = 0; j < sortedTasks.size(); j++) {
+				matriceDistance[i][j] = DistanceHelper.distance(sortedTasks.get(i).getLat(), sortedTasks.get(i).getLng(), sortedTasks.get(j).getLat(), sortedTasks.get(j).getLng(), "K");
+			}
+		}
+		
+		double[][] matriceTemps = new double[tasksCount][tasksCount];
+		for (int i = 0; i < sortedTasks.size(); i++) {
+			for (int j = 0; j < sortedTasks.size(); j++) {
+				matriceTemps[i][j] = TimeHelper.processTime(DistanceHelper.distance(sortedTasks.get(i).getLat(),
+						sortedTasks.get(i).getLng(), sortedTasks.get(j).getLat(), sortedTasks.get(j).getLng(), "K"));
+//				System.out.println(i + "," + j + " = " + matriceTemps[i][j]);
+			}
+		}
+
+		int i = 1;
+		List<Tasker> taskers = new LinkedList<>();
+		for (Task sortedTask : sortedTasks) {
+			if (i <= batch.getTaskersCount()) {
+				Tasker t = new Tasker(i, sortedTask.getLat(), sortedTask.getLng(), i, false, sortedTask.getDueTime());
+				taskers.add(t);
+				sortedTask.setAssigneeId(i);
+				i++;
+			} else {
+				break;
+			}
+		}
+		
+		batch.setTasks(sortedTasks);
 
 		log.info("------------------ " + LocalDateTime.now());
 		log.info("------------------ End of processing");

@@ -47,7 +47,6 @@ public class TaskController {
 
 		log.info("------------------ " + LocalDateTime.now());
 		log.info("------------------ Send request to /api/submitTasks");
-		// TODO send request
 
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.APPLICATION_JSON);
@@ -57,7 +56,8 @@ public class TaskController {
 		String result = restTemplate.postForObject("http://airhack-api.herokuapp.com/api/submitTasks", entity,
 				String.class);
 
-		System.out.println(result);
+		log.info("------------------ " + LocalDateTime.now());
+		log.info("------------------ Response " + result);
 		return processedBatch;
 	}
 

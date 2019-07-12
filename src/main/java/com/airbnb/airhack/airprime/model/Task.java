@@ -19,7 +19,7 @@ public class Task implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
-	private Integer id;
+	private Long id;
 	@JsonProperty("assignee_id")
 	private Integer assigneeId;
 	private float lat;

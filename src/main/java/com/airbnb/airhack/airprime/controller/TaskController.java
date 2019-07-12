@@ -1,20 +1,39 @@
 package com.airbnb.airhack.airprime.controller;
 
-import java.util.Arrays;
+import java.time.LocalDateTime;
 
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.airbnb.airhack.airprime.model.Batch;
-import com.airbnb.airhack.airprime.model.Task;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 @RestController
-@RequestMapping("/api/hooks")
+@RequestMapping(value = "/api/hooks")
+@CrossOrigin(origins = "*", methods = { RequestMethod.GET, RequestMethod.OPTIONS, RequestMethod.POST })
 public class TaskController {
 
-	@GetMapping("/incomingTasks")
-	public Batch incomingTasks() {
-		return new Batch("id1", 5, 50, Arrays.asList(new Task(1, null, 1.333f, 4.4554f, "16:00")));
+	@PostMapping(value = "/incomingTasks")
+	public Batch incomingTasks(@RequestBody Batch batch) {
+		log.info("------------------ " + LocalDateTime.now());
+		log.info("------------------ Inside incoming Tasks POST");
+		log.info("------------------ Batch : " + batch);
+
+		return batch;
+	}
+
+	@GetMapping("/ping")
+	public String ping() {
+		log.info("------------------ " + LocalDateTime.now());
+		log.info("------------------ Inside ping");
+		
+		return "ping OK";
 	}
 }

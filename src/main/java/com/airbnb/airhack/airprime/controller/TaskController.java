@@ -79,7 +79,7 @@ public class TaskController {
 				int idPerson = -1;
 				double min = Integer.MAX_VALUE;
 				for (int j = 0; j < taskers.size(); j++) {
-					Tasker t = taskers.get(i);
+					Tasker t = taskers.get(j);
 					double travel = matriceTemps[t.getPoint()][sortedTask.getId().intValue()];
 					double arrivedTime = t.getNextAvailability() + travel;
 					if (arrivedTime <= sortedTask.getMinutesFromDueTime()) {

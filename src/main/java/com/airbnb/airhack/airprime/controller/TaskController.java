@@ -119,7 +119,7 @@ public class TaskController {
 		HttpEntity<Batch> entity = new HttpEntity<Batch>(batch, headers);
 		String result = restTemplate.postForObject("http://airhack-api.herokuapp.com/api/submitTasks", entity,
 				String.class);
-
+		log.info("-----------result " + result);
 		return processedBatch;
 	}
 

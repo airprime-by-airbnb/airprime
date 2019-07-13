@@ -117,9 +117,15 @@ public class TaskController {
 		headers.set("Authorization", "Bearer " + "3IgAUjz5f3Rntu1WefSt6vTXZ5C7dgEi3cU75t4L2hJSCNLIkaXsDid4gdWl");
 
 		HttpEntity<Batch> entity = new HttpEntity<Batch>(batch, headers);
+		try {
 		String result = restTemplate.postForObject("http://airhack-api.herokuapp.com/api/submitTasks", entity,
+			
 				String.class);
-		log.info("-----------result " + result);
+		} catch (Exception e) {
+			log.error("-----------error");
+			log.error(e.getMessage(), e);
+		}
+//		log.info("-----------result " + result);
 		return processedBatch;
 	}
 

@@ -50,6 +50,8 @@ public class TaskController {
 	@PostMapping(value = "/incomingTasks")
 	public Batch incomingTasks(@RequestBody Batch batch) throws RestClientException, URISyntaxException {
 	
+		log.info("------------ " + batch.getTasksCount());
+		log.info("------------ " + batch);
 		Batch processedBatch = batch;
 		// TODO processing
 		List<Task> sortedTasks = batch.getTasks().stream().sorted().collect(Collectors.toList());

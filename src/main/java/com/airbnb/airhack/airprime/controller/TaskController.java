@@ -1,5 +1,10 @@
 package com.airbnb.airhack.airprime.controller;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
 import java.net.URISyntaxException;
 import java.time.LocalDateTime;
 import java.util.LinkedList;
@@ -16,6 +21,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
@@ -25,6 +31,10 @@ import com.airbnb.airhack.airprime.helper.TimeHelper;
 import com.airbnb.airhack.airprime.model.Batch;
 import com.airbnb.airhack.airprime.model.Task;
 import com.airbnb.airhack.airprime.model.Tasker;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -39,31 +49,26 @@ public class TaskController {
 
 	@PostMapping(value = "/incomingTasks")
 	public Batch incomingTasks(@RequestBody Batch batch) throws RestClientException, URISyntaxException {
-		log.info("------------------ " + LocalDateTime.now());
-		log.info("------------------ Inside incoming Tasks POST");
-		log.info("------------------ Batch : " + batch);
-
+	
 		Batch processedBatch = batch;
-		log.info("------------------ " + LocalDateTime.now());
-		log.info("------------------ Processing");
-
 		// TODO processing
 		List<Task> sortedTasks = batch.getTasks().stream().sorted().collect(Collectors.toList());
 		int tasksCount = batch.getTasksCount();
-		
+
 		double[][] matriceDistance = new double[tasksCount][tasksCount];
 		for (int i = 0; i < sortedTasks.size(); i++) {
 			for (int j = 0; j < sortedTasks.size(); j++) {
-				matriceDistance[i][j] = DistanceHelper.distance(sortedTasks.get(i).getLat(), sortedTasks.get(i).getLng(), sortedTasks.get(j).getLat(), sortedTasks.get(j).getLng(), "K");
+				matriceDistance[i][j] = DistanceHelper.distance(sortedTasks.get(i).getLat(),
+						sortedTasks.get(i).getLng(), sortedTasks.get(j).getLat(), sortedTasks.get(j).getLng(), "K");
 			}
 		}
-		
+
 		double[][] matriceTemps = new double[tasksCount][tasksCount];
 		for (int i = 0; i < sortedTasks.size(); i++) {
 			for (int j = 0; j < sortedTasks.size(); j++) {
 				matriceTemps[i][j] = TimeHelper.processTime(DistanceHelper.distance(sortedTasks.get(i).getLat(),
 						sortedTasks.get(i).getLng(), sortedTasks.get(j).getLat(), sortedTasks.get(j).getLng(), "K"));
-//				System.out.println(i + "," + j + " = " + matriceTemps[i][j]);
+				// System.out.println(i + "," + j + " = " + matriceTemps[i][j]);
 			}
 		}
 
@@ -74,7 +79,7 @@ public class TaskController {
 				Tasker t = new Tasker(i, sortedTask.getLat(), sortedTask.getLng(), i, false, sortedTask.getDueTime());
 				taskers.add(t);
 				sortedTask.setAssigneeId(i);
-				
+
 			} else {
 				int idPerson = -1;
 				double min = Integer.MAX_VALUE;
@@ -100,16 +105,8 @@ public class TaskController {
 			}
 			i++;
 		}
-		System.out.println("Taskers : " + taskers);
-		System.out.println("batch : " + batch);
-
 		batch.setTasks(sortedTasks);
 
-		log.info("------------------ " + LocalDateTime.now());
-		log.info("------------------ End of processing");
-
-		log.info("------------------ " + LocalDateTime.now());
-		log.info("------------------ Send request to /api/submitTasks");
 
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.APPLICATION_JSON);
@@ -119,16 +116,79 @@ public class TaskController {
 		String result = restTemplate.postForObject("http://airhack-api.herokuapp.com/api/submitTasks", entity,
 				String.class);
 
-		log.info("------------------ " + LocalDateTime.now());
-		log.info("------------------ Response " + result);
 		return processedBatch;
 	}
 
+	@GetMapping("/markers")
+	public JsonNode getMarkers() throws FileNotFoundException, IOException {
+		File f = new File("src/main/resources/finalbatch.json");
+
+		BufferedReader br = new BufferedReader(new FileReader(f));
+		String json = "";
+		String line = br.readLine();
+
+		ObjectMapper mapper = new ObjectMapper();
+		JsonNode node = mapper.readTree(line);
+
+		return node;
+		// JsonNode subNode = node.get("tasks");
+		//
+		// ArrayNode newNode = mapper.createArrayNode();
+		// int i = 0;
+		// for (JsonNode n : subNode) {
+		//
+		// if (i < 50) {
+		//
+		// if(i>10) {
+		// ((ObjectNode)n).remove("assigneeId");
+		// ((ObjectNode)n).put("assigneeId", 2);
+		// }
+		// int status = 3;
+		//
+		// if(n.get("assigneeId").isNull()) {
+		//
+		// status = 3;
+		// } else {
+		// status = new Random().nextInt(3);
+		// }
+		// ((ObjectNode)n).put("status", status);
+		// newNode.add(n);
+		// } else {
+		// break;
+		// }
+		// i++;
+		// }
+		// ObjectNode n = ((ObjectNode)node);
+		// n.remove("tasks");
+		// n.set("tasks", newNode);
+		// n.remove("tasksCount");
+		// n.put("tasksCount", 50);
+		// BufferedWriter bw = new BufferedWriter(new FileWriter(new
+		// File("src/main/resources/finalbatch.json")));
+		// System.out.println(n.toString());
+		// bw.write(n.toString());
+		// return n;
+	}
+
+	@GetMapping("/batch")
+	public JsonNode getByStatus(@RequestParam("status") int status) throws FileNotFoundException, IOException {
+		JsonNode batch = getMarkers();
+		ArrayNode newNode = new ObjectMapper().createArrayNode();
+		for (JsonNode n : batch.get("tasks")) {
+			if (n.get("status").intValue() == status) {
+				newNode.add(n);
+			}
+		}
+		((ObjectNode) batch).remove("tasks");
+		((ObjectNode) batch).set("tasks", newNode);
+		return batch;
+	}
+
 	@GetMapping("/ping")
-	public String ping() {
+	public Batch ping() {
 		log.info("------------------ " + LocalDateTime.now());
 		log.info("------------------ Inside ping");
 
-		return "ping OK";
+		return new Batch();
 	}
 }

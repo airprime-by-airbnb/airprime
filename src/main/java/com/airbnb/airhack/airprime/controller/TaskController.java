@@ -31,6 +31,8 @@ import com.airbnb.airhack.airprime.helper.TimeHelper;
 import com.airbnb.airhack.airprime.model.Batch;
 import com.airbnb.airhack.airprime.model.Task;
 import com.airbnb.airhack.airprime.model.Tasker;
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -46,6 +48,12 @@ public class TaskController {
 
 	@Autowired
 	private RestTemplate restTemplate;
+	
+	@GetMapping("/go")
+	public Batch go() throws JsonParseException, JsonMappingException, IOException, RestClientException, URISyntaxException {
+		Batch b = new ObjectMapper().readValue(new File("src/main/resources/newbatch.json"), Batch.class);
+		return incomingTasks(b);
+	}
 
 	@PostMapping(value = "/incomingTasks")
 	public Batch incomingTasks(@RequestBody Batch batch) throws RestClientException, URISyntaxException {
@@ -80,7 +88,7 @@ public class TaskController {
 			if (i < batch.getTaskersCount()) {
 				Tasker t = new Tasker(i, sortedTask.getLat(), sortedTask.getLng(), i, false, sortedTask.getDueTime());
 				taskers.add(t);
-				sortedTask.setAssigneeId(i);
+				sortedTask.setAssignee_id(i);
 
 			} else {
 				int idPerson = -1;
@@ -98,7 +106,7 @@ public class TaskController {
 				}
 				if (idPerson != -1) {
 
-					sortedTask.setAssigneeId(idPerson);
+					sortedTask.setAssignee_id(idPerson);
 					Tasker currentTasker = taskers.get(idPerson);
 					currentTasker.setPoint(i);
 					currentTasker.setDueTime(sortedTask.getDueTime());
@@ -121,6 +129,7 @@ public class TaskController {
 		String result = restTemplate.postForObject("http://airhack-api.herokuapp.com/api/submitTasks", entity,
 			
 				String.class);
+
 		} catch (Exception e) {
 			log.error("-----------error");
 			log.error(e.getMessage(), e);

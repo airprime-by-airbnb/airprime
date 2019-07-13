@@ -24,8 +24,8 @@ public class Task implements Serializable, Comparable<Task> {
 	private static final long serialVersionUID = 1L;
 
 	private Long id;
-	@JsonProperty("assignee_id")
-	private Integer assigneeId;
+//	@JsonProperty("assignee_id")
+	private Integer assignee_id;
 	private double lat;
 	private double lng;
 	private String dueTime;

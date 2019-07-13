@@ -110,6 +110,8 @@ public class TaskController {
 		batch.setTasks(sortedTasks);
 
 
+		log.info("------------output");
+		log.info("---------------" + batch);
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.APPLICATION_JSON);
 		headers.set("Authorization", "Bearer " + "3IgAUjz5f3Rntu1WefSt6vTXZ5C7dgEi3cU75t4L2hJSCNLIkaXsDid4gdWl");

@@ -48,7 +48,7 @@ public class Algo {
 			if (i <= batch.getTaskersCount()) {
 				Tasker t = new Tasker(i, sortedTask.getLat(), sortedTask.getLng(), i, false, sortedTask.getDueTime());
 				taskers.add(t);
-				sortedTask.setAssigneeId(i);
+				sortedTask.setAssignee_id(i);
 				i++;
 			} else {
 				int idPerson = -1;
@@ -66,7 +66,7 @@ public class Algo {
 				}
 				if (idPerson != -1) {
 
-					sortedTask.setAssigneeId(idPerson);
+					sortedTask.setAssignee_id(idPerson);
 					Tasker currentTasker = taskers.get(idPerson - 1);
 					currentTasker.setDueTime(sortedTask.getDueTime());
 				}
